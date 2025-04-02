@@ -19,10 +19,10 @@ TO DO
 
 ## Team Members 
 (TO DO – Link your profiles pls)
-Sarah Wang(https://github.com/sarahswang)
-Jimena Menendez() 
-Julia Ahn()
-Sophia Schlicting()
+- Sarah Wang(https://github.com/sarahswang)
+- Jimena Menendez() 
+- Julia Ahn()
+- Sophia Schlicting()
 
 ## Configuration Instructions
 TO DO
