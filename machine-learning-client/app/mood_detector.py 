@@ -1,21 +1,19 @@
 from fer import FER
 import cv2
+import numpy as np
 from database import save_emotion
-import time
 
 detector = FER()
 
-def detect_emotion(user_id="default_user"):
-    cap = cv2.VideoCapture(0)
-    try:
-        while True:
-            _, frame = cap.read()
-            emotion, _ = detector.top_emotion(frame)  # Get dominant emotion
-            if emotion:
-                save_emotion(user_id, emotion)
-            time.sleep(5)  # Check every 5 seconds
-    finally:
-        cap.release()
+def analyze_emotion(frame: np.ndarray) -> str:
+    """Analyze frame and return dominant emotion."""
+    emotion, _ = detector.top_emotion(frame)
+    return emotion or "neutral"
 
-if __name__ == "__main__":
-    detect_emotion()
+def process_frame(frame_data: str):
+    """Decode base64 image and analyze."""
+    nparr = np.frombuffer(base64.b64decode(frame_data), np.uint8)
+    frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    emotion = analyze_emotion(frame)
+    save_emotion(emotion)
+    return emotion
