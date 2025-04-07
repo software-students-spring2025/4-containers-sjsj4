@@ -1,14 +1,35 @@
-services:
-  ml-client:
-    build: ./machine-learning-client
-    environment:
-      - MONGO_URI=mongodb+srv://sms10010:Password@swe4.j4qqg1h.mongodb.net/?retryWrites=true&w=majority&appName=SWE4
-    devices:
-      - "/dev/video0:/dev/video0"
+version: "3.8"
 
-  web-app:
-    build: ./web-app
-    ports:
-      - "5001:5000"
-    environment:
-      - MONGO_URI=mongodb+srv://sms10010:Password@swe4.j4qqg1h.mongodb.net/?retryWrites=true&w=majority&appName=SWE4
+services:
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=mood_light
+
+  ml-client:
+    build: ./machine-learning-client
+    ports:
+      - "5001:5001"
+    depends_on:
+      - mongodb
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/mood_light
+
+  web-app:
+    build: ./web-app
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongodb
+      - ml-client
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/mood_light
+      - ML_CLIENT_URL=http://ml-client:5001
+
+volumes:
+  mongodb_data:
