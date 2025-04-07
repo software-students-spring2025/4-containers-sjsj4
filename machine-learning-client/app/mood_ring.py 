@@ -1,0 +1,21 @@
+from fer import FER
+import cv2
+from database import save_emotion
+import time
+
+detector = FER()
+
+def detect_emotion(user_id="default_user"):
+    cap = cv2.VideoCapture(0)
+    try:
+        while True:
+            _, frame = cap.read()
+            emotion, _ = detector.top_emotion(frame)  # Get dominant emotion
+            if emotion:
+                save_emotion(user_id, emotion)
+            time.sleep(5)  # Check every 5 seconds
+    finally:
+        cap.release()
+
+if __name__ == "__main__":
+    detect_emotion()

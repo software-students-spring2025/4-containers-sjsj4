@@ -1,0 +1,14 @@
+services:
+  ml-client:
+    build: ./machine-learning-client
+    environment:
+      - MONGO_URI=mongodb+srv://sms10010:Password@swe4.j4qqg1h.mongodb.net/?retryWrites=true&w=majority&appName=SWE4
+    devices:
+      - "/dev/video0:/dev/video0"
+
+  web-app:
+    build: ./web-app
+    ports:
+      - "5001:5000"
+    environment:
+      - MONGO_URI=mongodb+srv://sms10010:Password@swe4.j4qqg1h.mongodb.net/?retryWrites=true&w=majority&appName=SWE4
