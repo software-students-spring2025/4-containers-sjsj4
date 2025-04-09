@@ -1,5 +1,7 @@
 ![Lint-free](https://github.com/nyu-software-engineering/containerized-app-exercise/actions/workflows/lint.yml/badge.svg)
-Badges need to be added !!
+![ML Client](https://github.com/nyu-software-engineering/containerized-app-exercise/machine-learning-client/badge.svg)
+![Web App](https://github.com/nyu-software-engineering/containerized-app-exercise/web-app/badge.svg)
+
 
 # README Instructions
 
