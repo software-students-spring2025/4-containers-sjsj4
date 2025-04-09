@@ -1,0 +1,45 @@
+version: "3.8"
+
+services:
+  web-app:
+    build:
+      context: ./web-app
+      dockerfile: Dockerfile
+    ports:
+      - "5003:5000"
+    depends_on:
+      - machine-learning-client
+      - mongodb
+    volumes:
+      - ./web-app:/app
+    environment:
+      - ML_CLIENT_URL=http://machine-learning-client:5000
+      - MONGO_URI=mongodb://mongodb:27017
+
+  machine-learning-client:
+    build:
+      context: ./machine-learning-client
+      dockerfile: Dockerfile
+    ports:
+      - "5005:5000"
+    depends_on:
+      - mongodb
+    volumes:
+      - ./machine-learning-client:/app
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017
+      - INFERENCE_SERVER_URL=https://detect.roboflow.com
+      - ROBOFLOW_API_KEY=ogLxH2CgV5m0vTm5ZCii
+      - ROBOFLOW_MODEL_ID=rock-paper-scissors-sxsw/14
+
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:
