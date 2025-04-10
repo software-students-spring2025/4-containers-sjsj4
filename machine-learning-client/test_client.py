@@ -65,3 +65,47 @@ def test_database_insertion_failure(mock_db, mock_model, client):
 
     assert response.status_code == 500
     assert "Prediction error" in response.get_json()["error"]
+
+# file saving failure
+@patch("client.inference_client")
+@patch("client.collection")
+@patch("os.makedirs")
+def test_file_saving_error(mock_os, mock_db, mock_model, client):
+    mock_model.infer.return_value = {"predictions": [{"class": "Scissors", "confidence": 0.90}]}
+
+    with patch("werkzeug.datastructures.FileStorage.save", side_effect=FileNotFoundError("Save error")):
+        image_data = {"image": (BytesIO(b"fake image bytes"), "sample.jpg")}
+        response = client.post("/predict", content_type="multipart/form-data", data=image_data)
+
+        assert response.status_code == 500
+        assert "Prediction error" in response.get_json()["error"]
+
+
+# model returns invalid response (since missing class key
+@patch("client.inference_client")
+@patch("client.collection")
+def test_invalid_model_response(mock_db, mock_model, client):
+    mock_model.infer.return_value = {"predictions": [{"confidence": 0.80}]}
+
+    image_data = {"image": (BytesIO(b"fake image bytes"), "sample.jpg")}
+    response = client.post("/predict", content_type="multipart/form-data", data=image_data)
+
+    assert response.status_code == 200
+    response_json = response.get_json()
+    assert response_json["gesture"] == "Unknown"
+    assert response_json["confidence"] == 0
+
+# image = too large
+@patch("client.inference_client")
+@patch("client.collection")
+def test_large_image_upload(mock_db, mock_model, client):
+    mock_model.infer.return_value = {"predictions": [{"class": "Rock", "confidence": 0.92}]}
+    mock_db.insert_one.return_value = MagicMock()
+
+    large_image = BytesIO(b"x" * (5 * 1024 * 1024))  # 5MB dummy image
+    image_data = {"image": (large_image, "large_image.jpg")}
+    response = client.post("/predict", content_type="multipart/form-data", data=image_data)
+
+    assert response.status_code == 200
+    response_json = response.get_json()
+    assert response_json["gesture"] == "Rock"
