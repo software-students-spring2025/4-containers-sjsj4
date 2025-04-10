@@ -3,9 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Result</title>
+    <link rel="stylesheet" href="../static/css/style.css">
 </head>
 <body>
-    
+    <h1>Game Result</h1>
+    <div class="result-container">
+        <p><strong>Your Move:</strong> {{ user }}</p>
+        <p><strong>Computer's Move:</strong> {{ ai }}</p>
+        <p><strong>Result:</strong> {{ result }}</p>
+        <a href="/">Play Again</a>
+    </div>
 </body>
 </html>
+
