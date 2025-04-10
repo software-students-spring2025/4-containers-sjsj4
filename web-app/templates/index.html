@@ -3,9 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Rock Paper Scissors</title>
+    <link rel="stylesheet" href="../static/css/style.css">
 </head>
 <body>
-    
+    <h1>Rock Paper Scissors</h1>
+
+    <video id="video" autoplay playsinline width="640" height="480"></video>
+    <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+
+    <button id="picture">Capture Move</button>
+    <form id="play-form" action="/result" method="POST" enctype="multipart/form-data">
+        <input type="file" id="image-input" name="image" style="display: none;">
+        <button type="submit" id="go-button">Go</button>
+    </form>
+
+    <div id="loading-message">Processing ...</div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const pictureButton = document.getElementById('picture');
+        const imageInput = document.getElementById('image-input');
+        const goButton = document.getElementById('go-button');
+        const playForm = document.getElementById('play-form');
+        const loadingMessage = document.getElementById('loading-message');
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then((stream) => {
+                video.srcObject = stream;
+            })
+            .catch((err) => {
+                alert("Cannot access camera.");
+            });
+
+        pictureButton.addEventListener('click', () => {
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            canvas.toBlob((blob) => {
+                const file = new File([blob], "gesture.jpg", { type: "image/jpeg" });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                imageInput.files = dataTransfer.files;
+
+                alert("Press 'Go' to play!");
+            }, "image/jpeg");
+        });
+
+        playForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            loadingMessage.style.display = 'block';
+            goButton.disabled = true;
+            setTimeout(() => {
+                playForm.submit();
+            }, 500);
+        });
+    </script>
 </body>
 </html>
