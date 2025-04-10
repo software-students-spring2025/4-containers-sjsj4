@@ -1,3 +1,5 @@
+"""Client module for the ML API."""
+
 import os
 import logging
 from flask import Flask, request, jsonify
