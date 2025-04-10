@@ -9,7 +9,7 @@ For our web-application we are creating a Rock, Paper, Scissors game. With our a
 - [Sarah Wang](https://github.com/sarahswang)
 - [Jimena Menendez](https:/github.com/jkm8294)
 - [Julia Ahn](https:/github.com/juliaahn)
-- [Sophia Schlicting](https:/github.com/schlichtings)
+- [Sophia Schlichting](https:/github.com/schlichtings)
 
 ## Configuration Instructions
 To run the program for yourself, run the following command in your Terminal:
