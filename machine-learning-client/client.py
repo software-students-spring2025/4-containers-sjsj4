@@ -9,7 +9,6 @@ from requests.exceptions import RequestException
 app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
-# MongoDB connection
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://mongodb:27017")
 client = MongoClient(MONGO_URI)
 db = client["rps_database"]
@@ -18,48 +17,36 @@ collection = db["predictions"]
 API_URL = os.getenv("INFERENCE_SERVER_URL", "http://localhost:9001")
 API_KEY = os.getenv("ROBOFLOW_API_KEY")  
 MODEL_ID = os.getenv("ROBOFLOW_MODEL_ID")
-rf_client = InferenceHTTPClient(api_url=API_URL, api_key=API_KEY)
-
+inference_client = InferenceHTTPClient(api_url=API_URL, api_key=API_KEY)
 
 @app.route("/predict", methods=["POST"])
 def predict():
-    """
-    Handle prediction requests.
-
-    Accepts an image file, performs inference using the Roboflow model, and stores the result
-    in MongoDB. Returns the predicted gesture and confidence score.
-    """
     try:
         if "image" not in request.files:
             logging.error("No image file provided")
             return jsonify({"error": "No image file provided"}), 400
 
-        file = request.files["image"]
-        image_path = f"./temp/{file.filename}"
+        image_file = request.files["image"]
+        temp_path = f"./temp/{image_file.filename}"
         os.makedirs("./temp", exist_ok=True)
-        file.save(image_path)
+        image_file.save(temp_path)
 
-        result = rf_client.infer(image_path, model_id=MODEL_ID)
+        result = inference_client.infer(temp_path, model_id=MODEL_ID)
 
-        prediction = result.get("predictions", [{}])[0]
-        gesture = prediction.get("class", "Unknown")
-        if gesture == "Unknown":
-            prediction_score = 0
-        else:
-            prediction_score = prediction.get("confidence", 0)
+        prediction_data = result.get("predictions", [{}])[0]
+        gesture = prediction_data.get("class", "Unknown")
+        confidence = prediction_data.get("confidence", 0) if gesture != "Unknown" else 0
 
-        prediction_data = {
+        record = {
             "gesture": gesture,
-            "prediction_score": prediction_score,
-            "image_metadata": {"filename": file.filename},
+            "prediction_score": confidence,
+            "image_metadata": {"filename": image_file.filename},
         }
-        collection.insert_one(prediction_data)
-        logging.debug("Prediction data stored in MongoDB: %s", prediction_data)
+        collection.insert_one(record)
 
-        return jsonify({"gesture": gesture, "confidence": prediction_score})
-    except (RequestException, PyMongoError, FileNotFoundError) as prediction_error:
-        logging.error("Prediction error: %s", str(prediction_error))
-        return jsonify({"error": f"Prediction error: {str(prediction_error)}"}), 500
+        return jsonify({"gesture": gesture, "confidence": confidence})
+    except (RequestException, PyMongoError, FileNotFoundError) as error:
+        return jsonify({"error": f"Prediction error: {str(error)}"}), 500
 
 
 if __name__ == "__main__":
