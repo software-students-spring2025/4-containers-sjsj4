@@ -1,6 +1,7 @@
 ![Lint-free](https://github.com/nyu-software-engineering/containerized-app-exercise/actions/workflows/lint.yml/badge.svg)
-![ML Client](https://github.com/nyu-software-engineering/containerized-app-exercise/machine-learning-client/badge.svg)
-![Web App](https://github.com/nyu-software-engineering/containerized-app-exercise/web-app/badge.svg)
+![ML-Client](https://github.com/software-students-spring2025/4-containers-sjsj4/actions/workflows/build-ml-client.yml/badge.svg)
+![Web-App](https://github.com/software-students-spring2025/4-containers-sjsj4/actions/workflows/build-web-app.yml/badge.svg)
+
 
 
 # README Instructions
