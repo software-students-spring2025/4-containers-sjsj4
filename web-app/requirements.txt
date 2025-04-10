@@ -1,0 +1,12 @@
+Flask==2.0.3
+Werkzeug==2.0.3
+requests
+tensorflow
+opencv-python-headless
+numpy
+pylint
+black
+pipenv
+pymongo
+pytest
+pytest-cov
