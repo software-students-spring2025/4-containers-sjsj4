@@ -140,4 +140,73 @@ def test_home_route_creates_new_stats_doc(mock_generate_stats_doc, flask_client)
     assert "db_object_id" in response.headers.get("Set-Cookie", "")
     mock_generate_stats_doc.assert_called_once()
 
+@patch("app.generate_stats_doc", return_value=str(ObjectId()))
+def test_home_route(mock_generate_stats_doc, flask_client):
+    response = flask_client.get("/")
+    _ = mock_generate_stats_doc
+    assert response.status_code == 200
+    assert "db_object_id" in response.headers["Set-Cookie"]
+
+
+@patch("app.generate_stats_doc", return_value=str(ObjectId()))
+def test_index_route(mock_generate_stats_doc, flask_client: FlaskClient):
+    _ = mock_generate_stats_doc
+    response = flask_client.get("/index")
+    assert response.status_code == 200
+
+
+@patch("app.retry_request")
+@patch("app.collection.update_one")
+def test_result_route_success(
+    mock_retry_request, mock_update_one, flask_client: FlaskClient
+):
+    mockResponse = MagicMock()
+    mockResponse.json.return_value = {"gesture": "Scissors"}
+    mock_retry_request.return_value = mockResponse
+
+    mockId = ObjectId()
+    flask_client.set_cookie("db_object_id", str(mockId))
+
+    data = {"image": (BytesIO(b"fake image data"), "test_image.jpg")}
+    response = flask_client.post(
+        "/result", data=data, content_type="multipart/form-data"
+    )
+
+    assert response.status_code == 200
+    assert b"AI wins!" in response.data
+    _ = mock_update_one
+
+
+@patch("app.retry_request")
+def test_result_route_unknown_gesture(mock_retry_request, flask_client: FlaskClient):
+    mockResponse = MagicMock()
+    mockResponse.json.return_value = {"gesture": "Unknown"}
+    mock_retry_request.return_value = mockResponse
+
+    mockId = ObjectId()
+    flask_client.set_cookie("db_object_id", str(mockId))
+
+    data = {"image": (BytesIO(b"fake image data"), "test_image.jpg")}
+    response = flask_client.post(
+        "/result", data=data, content_type="multipart/form-data"
+    )
+
+    assert response.status_code == 200
+    assert b"Gesture not recognized" in response.data
+
+
+@patch("app.retry_request")
+def test_result_route_no_image(mock_retry_request, flask_client: FlaskClient):
+    response = flask_client.post("/result", data={}, content_type="multipart/form-data")
+    assert response.status_code == 400
+    assert b"No image file provided" in response.data
+    mock_retry_request.assert_not_called()
+
+
+@patch("app.generate_stats_doc", return_value=str(ObjectId()))
+def test_home_route_creates_new_stats_doc(mock_generate_stats_doc, flask_client):
+    response = flask_client.get("/")
+    assert response.status_code == 200
+    assert "db_object_id" in response.headers.get("Set-Cookie", "")
+    mock_generate_stats_doc.assert_called_once()
     
